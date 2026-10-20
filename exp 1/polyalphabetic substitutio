@@ -1,1 +1,49 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
+int main()
+{
+    char text[100], key[100];
+    int i, j = 0;
+
+    printf("Enter plaintext: ");
+    fgets(text, sizeof(text), stdin);
+
+    printf("Enter key: ");
+    fgets(key, sizeof(key), stdin);
+
+    key[strcspn(key, "\n")] = '\0';
+
+    if (strlen(key) == 0)
+    {
+        printf("Key cannot be empty.\n");
+        return 1;
+    }
+
+    printf("Ciphertext: ");
+
+    for (i = 0; text[i] != '\0'; i++)
+    {
+        if (isalpha((unsigned char)text[i]))
+        {
+            char base = isupper((unsigned char)text[i]) ? 'A' : 'a';
+            int shift = tolower((unsigned char)key[j % strlen(key)]) - 'a';
+
+            if (!isalpha((unsigned char)key[j % strlen(key)]))
+            {
+                printf("\nKey must contain only letters.\n");
+                return 1;
+            }
+
+            printf("%c", (text[i] - base + shift) % 26 + base);
+            j++;
+        }
+        else
+        {
+            printf("%c", text[i]);
+        }
+    }
+
+    return 0;
+}
