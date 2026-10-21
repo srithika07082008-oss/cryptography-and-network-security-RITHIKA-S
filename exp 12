@@ -1,1 +1,39 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 
+int main() {
+    char msg[200];
+    int a, b, c1, c2, i, n;
+
+    printf("Enter plaintext: ");
+    fgets(msg, sizeof(msg), stdin);
+
+    char text[200];
+    n = 0;
+
+    for (i = 0; msg[i] != '\0'; i++) {
+        if (isalpha((unsigned char)msg[i]))
+            text[n++] = tolower((unsigned char)msg[i]);
+    }
+
+    if (n % 2 != 0)
+        text[n++] = 'x';
+
+    text[n] = '\0';
+
+    printf("Ciphertext: ");
+
+    for (i = 0; i < n; i += 2) {
+        a = text[i] - 'a';
+        b = text[i + 1] - 'a';
+
+        c1 = (9 * a + 4 * b) % 26;
+        c2 = (5 * a + 7 * b) % 26;
+
+        printf("%c%c", c1 + 'a', c2 + 'a');
+    }
+
+    printf("\n");
+    return 0;
+}
