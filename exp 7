@@ -1,1 +1,27 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 
+int main() {
+    char cipher[1000], key[27];
+    int i, index;
+
+    printf("Enter ciphertext: ");
+    fgets(cipher, sizeof(cipher), stdin);
+
+    printf("Enter substitution alphabet: ");
+    scanf("%26s", key);
+
+    for (i = 0; cipher[i] != '\0'; i++) {
+        if (isupper((unsigned char)cipher[i])) {
+            index = cipher[i] - 'A';
+            cipher[i] = tolower((unsigned char)key[index]);
+        } else if (islower((unsigned char)cipher[i])) {
+            index = cipher[i] - 'a';
+            cipher[i] = tolower((unsigned char)key[index]);
+        }
+    }
+
+    printf("Decrypted message: %s", cipher);
+    return 0;
+}
