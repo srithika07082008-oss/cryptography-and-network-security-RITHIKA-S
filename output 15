@@ -1,1 +1,9 @@
+Enter the ciphertext: Wtaad Sdaas!
+How many top possible plaintexts would you like to see? 5
 
+--- Top 5 Most Likely Plaintexts ---
+Rank  1 (Key: 15, Likelihood Score: 0.0768): Hello World!
+Rank  2 (Key: 23, Likelihood Score: 0.0526): Zmttw Ewztl!
+Rank  3 (Key:  7, Likelihood Score: 0.0468): Pmtlw Ewtld!
+Rank  4 (Key:  2, Likelihood Score: 0.0450): Uryyb Jbeyq!
+Rank  5 (Key: 18, Likelihood Score: 0.0449): Ebiil Tloia!
