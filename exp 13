@@ -1,1 +1,31 @@
+#include <stdio.h>
 
+int main() {
+    int a, b, c, d, det, inv = -1, i;
+
+    printf("Enter matrix values (a b c d): ");
+    scanf("%d %d %d %d", &a, &b, &c, &d);
+
+    det = (a * d - b * c) % 26;
+    if (det < 0) det += 26;
+
+    for (i = 1; i < 26; i++) {
+        if ((det * i) % 26 == 1) {
+            inv = i;
+            break;
+        }
+    }
+
+    if (inv == -1) {
+        printf("Matrix has no inverse modulo 26.\n");
+        return 0;
+    }
+
+    printf("Inverse matrix modulo 26:\n");
+    printf("%d %d\n", (d * inv) % 26,
+           ((26 - b) * inv) % 26);
+    printf("%d %d\n", ((26 - c) * inv) % 26,
+           (a * inv) % 26);
+
+    return 0;
+}
