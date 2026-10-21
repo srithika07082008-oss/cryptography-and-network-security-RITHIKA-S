@@ -1,1 +1,4 @@
-
+Enter matrix values (a b c d): 9 4 5 7
+Inverse matrix modulo 26:
+5 12
+15 25
