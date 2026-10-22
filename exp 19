@@ -1,1 +1,28 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/evp.h>
 
+int main(void) {
+    unsigned char key[24] = {
+        0x01,0x23,0x45,0x67,0x89,0xAB,0xCD,0xEF,
+        0xFE,0xDC,0xBA,0x98,0x76,0x54,0x32,0x10,
+        0x89,0xAB,0xCD,0xEF,0x01,0x23,0x45,0x67
+    };
+    unsigned char iv[8] = {0};
+    unsigned char plaintext[16] = "HELLO";
+    unsigned char ciphertext[32];
+    int out1, out2;
+
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    EVP_EncryptInit_ex(ctx, EVP_des_ede3_cbc(), NULL, key, iv);
+    EVP_EncryptUpdate(ctx, ciphertext, &out1, plaintext, 8);
+    EVP_EncryptFinal_ex(ctx, ciphertext + out1, &out2);
+
+    printf("Ciphertext: ");
+    for (int i = 0; i < out1 + out2; i++)
+        printf("%02X", ciphertext[i]);
+    putchar('\n');
+
+    EVP_CIPHER_CTX_free(ctx);
+    return 0;
+}
