@@ -1,1 +1,45 @@
+#include <stdio.h>
+#include <stdint.h>
 
+static const int PC1[56] = {
+    57,49,41,33,25,17,9, 1,58,50,42,34,26,18,
+    10,2,59,51,43,35,27, 19,11,3,60,52,44,36,
+    63,55,47,39,31,23,15, 7,62,54,46,38,30,22,
+    14,6,61,53,45,37,29, 21,13,5,28,20,12,4
+};
+
+static const int SHIFTS[16] =
+    {1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1};
+
+/* Select the first 24 bits of a 28-bit half.
+   Positions are numbered 1 through 28, from the left. */
+static uint32_t first24(uint32_t half) {
+    return half >> 4;
+}
+
+int main(void) {
+    uint64_t key = 0x133457799BBCDFF1ULL;
+    uint64_t permuted = 0;
+
+    /* Apply PC-1 to the 64-bit input key. */
+    for (int i = 0; i < 56; i++) {
+        int bit = (int)((key >> (64 - PC1[i])) & 1ULL);
+        permuted = (permuted << 1) | (uint64_t)bit;
+    }
+
+    uint32_t C = (uint32_t)((permuted >> 28) & 0x0FFFFFFF);
+    uint32_t D = (uint32_t)(permuted & 0x0FFFFFFF);
+
+    for (int round = 0; round < 16; round++) {
+        int shift = SHIFTS[round];
+
+        C = ((C << shift) | (C >> (28 - shift))) & 0x0FFFFFFF;
+        D = ((D << shift) | (D >> (28 - shift))) & 0x0FFFFFFF;
+
+        uint64_t subkey = ((uint64_t)first24(C) << 24) | first24(D);
+        printf("K%-2d = %012llX\n", round + 1,
+               (unsigned long long)subkey);
+    }
+
+    return 0;
+}
