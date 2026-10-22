@@ -1,1 +1,2 @@
-
+ECB ciphertext error: P1 changed P2 same P3 same P4 same
+CBC ciphertext error: P1 changed P2 changed P3 same P4 same
