@@ -1,1 +1,52 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 
+typedef struct {
+    int letter;
+    int count;
+} Entry;
+
+int compare_entries(const void *a, const void *b) {
+    const Entry *x = a, *y = b;
+    return y->count - x->count;
+}
+
+int main(void) {
+    char cipher[] = "WKH TXLFN EURZQ IRA MXPSV RYHU WKH ODCB GRJ";
+    const char english_order[] = " etaoinshrdlucmfwypvbgkjqxz";
+    int count[26] = {0};
+    Entry entries[26];
+    char mapping[26];
+
+    for (int i = 0; i < 26; i++) {
+        entries[i].letter = i;
+        entries[i].count = 0;
+        mapping[i] = '?';
+    }
+
+    for (int i = 0; cipher[i]; i++)
+        if (isalpha((unsigned char)cipher[i]))
+            count[tolower((unsigned char)cipher[i]) - 'a']++;
+
+    for (int i = 0; i < 26; i++)
+        entries[i].count = count[i];
+
+    qsort(entries, 26, sizeof(Entry), compare_entries);
+
+    /* Approximate English letter-frequency order, without leading space. */
+    const char *order = "etaoinshrdlucmfwypvbgkjqxz";
+    for (int i = 0; i < 26; i++)
+        mapping[entries[i].letter] = order[i];
+
+    printf("Frequency-based candidate: ");
+    for (int i = 0; cipher[i]; i++) {
+        if (isalpha((unsigned char)cipher[i]))
+            putchar(mapping[tolower((unsigned char)cipher[i]) - 'a']);
+        else
+            putchar(cipher[i]);
+    }
+    putchar('\n');
+    return 0;
+}
