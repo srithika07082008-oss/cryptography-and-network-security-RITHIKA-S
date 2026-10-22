@@ -1,1 +1,105 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/evp.h>
 
+#define BLOCK 16
+#define BLOCKS 4
+
+static int encrypt(const EVP_CIPHER *cipher, const unsigned char *key,
+                   const unsigned char *iv, const unsigned char *input,
+                   unsigned char *output) {
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    int n = 0, total = 0;
+
+    if (!ctx || EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv) != 1 ||
+        EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
+        EVP_EncryptUpdate(ctx, output, &n, input, BLOCK * BLOCKS) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+    total = n;
+
+    if (EVP_EncryptFinal_ex(ctx, output + total, &n) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+    total += n;
+    EVP_CIPHER_CTX_free(ctx);
+    return total;
+}
+
+static int decrypt(const EVP_CIPHER *cipher, const unsigned char *key,
+                   const unsigned char *iv, const unsigned char *input,
+                   unsigned char *output) {
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    int n = 0, total = 0;
+
+    if (!ctx || EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv) != 1 ||
+        EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
+        EVP_DecryptUpdate(ctx, output, &n, input, BLOCK * BLOCKS) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+    total = n;
+
+    if (EVP_DecryptFinal_ex(ctx, output + total, &n) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        return 0;
+    }
+    total += n;
+    EVP_CIPHER_CTX_free(ctx);
+    return total;
+}
+
+static void show_block_differences(const char *label,
+                                   const unsigned char *original,
+                                   const unsigned char *damaged) {
+    printf("%s", label);
+    for (int b = 0; b < BLOCKS; b++) {
+        int different = memcmp(original + b * BLOCK,
+                               damaged + b * BLOCK, BLOCK) != 0;
+        printf(" P%d%s", b + 1, different ? " changed" : " same");
+    }
+    putchar('\n');
+}
+
+int main(void) {
+    unsigned char key[16] = "0123456789abcdef";
+    unsigned char iv[16] = "fedcba9876543210";
+    unsigned char plain[BLOCK * BLOCKS] =
+        "Block one data!!Block two data!!Block three dataBlock four data";
+    unsigned char cipher[BLOCK * BLOCKS], damaged[BLOCK * BLOCKS];
+    unsigned char decoded[BLOCK * BLOCKS], altered[BLOCK * BLOCKS];
+    const EVP_CIPHER *aes_ecb = EVP_aes_128_ecb();
+    const EVP_CIPHER *aes_cbc = EVP_aes_128_cbc();
+
+    if (!encrypt(aes_ecb, key, iv, plain, cipher) ||
+        !decrypt(aes_ecb, key, iv, cipher, decoded)) {
+        fprintf(stderr, "ECB operation failed\n");
+        return 1;
+    }
+
+    memcpy(damaged, cipher, sizeof(cipher));
+    damaged[0] ^= 0x01; /* Flip one bit in ciphertext block 1. */
+    if (!decrypt(aes_ecb, key, iv, damaged, altered)) {
+        fprintf(stderr, "ECB decryption failed\n");
+        return 1;
+    }
+    show_block_differences("ECB ciphertext error:", decoded, altered);
+
+    if (!encrypt(aes_cbc, key, iv, plain, cipher) ||
+        !decrypt(aes_cbc, key, iv, cipher, decoded)) {
+        fprintf(stderr, "CBC operation failed\n");
+        return 1;
+    }
+
+    memcpy(damaged, cipher, sizeof(cipher));
+    damaged[0] ^= 0x01; /* Flip one bit in ciphertext block 1. */
+    if (!decrypt(aes_cbc, key, iv, damaged, altered)) {
+        fprintf(stderr, "CBC decryption failed\n");
+        return 1;
+    }
+    show_block_differences("CBC ciphertext error:", decoded, altered);
+
+    return 0;
+}
