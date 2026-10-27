@@ -1,1 +1,23 @@
+#include <stdio.h>
 
+int main(void)
+{
+    int p=59, q=61;
+    int n=p*q;
+    int phi=(p-1)*(q-1);
+    int e=31, d;
+
+    for(d=1; d<phi; d++){
+        if((e*d)%phi==1)
+            break;
+    }
+
+    printf("p = %d\n",p);
+    printf("q = %d\n",q);
+    printf("n = %d\n",n);
+    printf("Phi(n) = %d\n",phi);
+    printf("Public key = (%d, %d)\n",e,n);
+    printf("Private key = (%d, %d)\n",d,n);
+
+    return 0;
+}
